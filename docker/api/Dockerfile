@@ -21,15 +21,19 @@ RUN mkdir -p /usr/share/man/man1 \
 
 RUN docker-php-ext-install zip
 
-#RUN composer install
-#
-#RUN php artisan migrate
-#
-#RUN php artisan key:generate
-#RUN php artisan passport:install
-
 RUN apt-get install -y gnupg2
 RUN rm -rf /var/lib/apt/lists/ && curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get install nodejs -y
+
+COPY . /var/www/html/payment.local
+
+WORKDIR /var/www/html/payment.local
+
+RUN ls
+RUN cp .env.example .env
+
+RUN composer install
+
+RUN php artisan key:generate
 
 EXPOSE 8000
