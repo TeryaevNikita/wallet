@@ -1,0 +1,48 @@
+version: "3.1"
+
+services:
+  app:
+    build:
+      context: ./docker/api
+    tty: true
+    working_dir: /var/www/html/payment.local
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/var/www/html/payment.local
+    depends_on:
+      - postgres
+      - nginx
+#    command: php artisan serve --host=0.0.0.0 --port=8000
+  nginx:
+    image: nginx:1.13
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./:/var/www/html/payment.local
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - php-fpm
+  php-fpm:
+    build:
+      context: ./docker/php-fpm
+    volumes:
+      - ./:/var/www/html/payment.local
+    depends_on:
+      - postgres
+  postgres:
+    build:
+      context: ./docker/database
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_ROOT_PASSWORD: postgres
+volumes:
+  postgres-volume:
